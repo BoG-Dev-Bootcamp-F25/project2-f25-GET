@@ -32,7 +32,7 @@ export default function LogIn() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
           />
-          <Link href = "/pages/createAccount" className="w-full pt-2">
+          <Link href = "/pages/trainingLogsDashboard" className="w-full pt-2">
             <button className="bg-red-500 text-white w-full rounded-l">Log In</button>
           </Link>
           <p>Don't have a login? <Link href="/pages/createAccount" className="font-bold">Sign up</Link></p>

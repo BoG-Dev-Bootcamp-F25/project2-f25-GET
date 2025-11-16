@@ -4,6 +4,7 @@ import Image from 'next/image';
 import TopBar from '../../components/TopBar';
 import InputField from '../../components/InputField';
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function CreateAccount() {
   const [fullName, setFullName] = useState('');
@@ -13,42 +14,68 @@ export default function CreateAccount() {
 
   return (
 
-    <div>
-      <TopBar></TopBar>
-        <InputField
-          type="text"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-          placeholder="Full Name"
-        />
-
-        <InputField
-          type="text"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-        />
-
-        <InputField
-          type="text"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-        />
-
-        <InputField
-          type="text"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Confirm Password"
-        />
       <div>
-      <p>
-        This is the create account page
-      </p>
-      
+      <TopBar />
+        
+      <div className="h-[calc(100vh-64px)] flex flex-col justify-between items-center">
+        <div></div>
+        <div className="flex flex-col w-full justify-center items-center max-w-md">
+          <p className="text-[30px] font-bold">Login</p>
+          <InputField
+            type="text"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Full Name"
+          />
+          <InputField
+            type="text"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+          />
+          <InputField
+            type="text"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+          />
+          <InputField
+            type="text"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirm Password"
+          />
+
+          <div className="w-full flex items-center gap-2 pt-2">
+            <input
+              type="checkbox"
+              id="adminAccess"
+              className="w-4 h-4 accent-red-500"
+            />
+            <label htmlFor="adminAccess" className="text-gray-600">Admin access</label>
+
+          </div>
+
+          <Link href = "/" className="w-full pt-2">
+            <button className="bg-red-500 text-white w-full">Sign Up</button>
+          </Link>
+
+
+          <p>Already have an account? <Link href="/" className="font-bold">Log In</Link></p>
+        </div>
+        <div className="pb-4">
+          <p>Made with ♥ by Euan, Gia, and Tiffany</p>
+        </div>
       </div>
-      
+      <Image
+        src="/images/quarterCircle.png"
+        alt="Quarter circle"
+        width={200}
+        height={200}
+        className="absolute bottom-0 left-0"
+      />
+
+
     </div>
   );
 }
