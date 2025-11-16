@@ -3,7 +3,7 @@ import Image from "next/image";
 export default function TopBar () {
     return (
         <div>
-            <div className="flex justify-left px-5 py-2.5">
+            <div className="flex justify-left px-5 py-2.5 font-bold">
                 <Image
                     src="/images/appLogo.png"
                     alt="App Logo"
