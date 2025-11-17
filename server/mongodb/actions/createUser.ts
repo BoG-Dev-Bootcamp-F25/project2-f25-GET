@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import connectDB from "../index";
 import User from "../models/User";
+import * as argon2 from "argon2";
 
 async function createUser(
     fullName: string,
@@ -10,7 +11,8 @@ async function createUser(
 ) {
     try {
         await connectDB();
-        const newUser = new User({ fullName, email, password, admin });
+        const hash = await argon2.hash(password);
+        const newUser = new User({ fullName, email, password: hash, admin });
         await newUser.save();
     } catch (error) {
         throw false;
