@@ -12,7 +12,7 @@ const trainingLogSchema = new Schema ({
         required: true
     },
     title: {
-        type: Number,
+        type: String,
         required: true,
     },
     date: {
@@ -28,4 +28,6 @@ const trainingLogSchema = new Schema ({
     }
 });
 
-export const Tree: Model<InferSchemaType<typeof trainingLogSchema>> = models.Tree ?? model('TrainingLog', trainingLogSchema);
+export const Tree: Model<InferSchemaType<typeof trainingLogSchema>> = models.TrainingLog ?? model('TrainingLog', trainingLogSchema);
+
+export default mongoose.models?.TrainingLog || mongoose.model("traininglogs", trainingLogSchema);

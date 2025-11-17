@@ -21,4 +21,4 @@ const userSchema = new Schema ({
 
 export const User: Model<InferSchemaType<typeof userSchema>> = models.User ?? model('User', userSchema);
 
-export default mongoose.models?.User || mongoose.model("User", userSchema);
+export default mongoose.models?.User || mongoose.model("users", userSchema);

@@ -25,3 +25,5 @@ const animalSchema = new Schema ({
 });
 
 export const Tree: Model<InferSchemaType<typeof animalSchema>> = models.animal ?? model('Animal', animalSchema);
+
+export default mongoose.models?.User || mongoose.model("animals", animalSchema);

@@ -24,3 +24,15 @@ export const POST = async (
         return new Response("Failed", { status: 500});
     }
 };
+
+/*
+sample usage
+POST
+http://localhost:3000/api/createUser
+{
+    "fullName": "Euan Ham",
+    "email": "Euanham05@gmail.com",
+    "password": "passwordbruh",
+    "admin": true
+}
+*/
