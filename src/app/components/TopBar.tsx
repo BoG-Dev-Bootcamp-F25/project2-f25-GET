@@ -11,7 +11,7 @@ export default function TopBar () {
                     width={84}
                     className="h-[30px] w-auto"
                 />
-            <p className="text-[30px] leading-none ml-2">
+            <p className="text-[30px] leading-none ml-2 font-['Oswald'] font-medium">
             Progress
             </p>
             </div>

@@ -15,8 +15,8 @@ export default function LogIn() {
       <TopBar />
         
       <div className="h-[calc(100vh-64px)] flex flex-col justify-between items-center">
-        <div></div>
-        <div className="flex flex-col w-full justify-center items-center max-w-md">
+        <div></div> 
+        <div className="flex flex-col w-xs justify-center items-center max-w-md space-y-5 text-xs">
           <p className="text-[30px] font-bold">Login</p>
           <InputField
             type="text"
@@ -25,19 +25,20 @@ export default function LogIn() {
             placeholder="Email"
           />
 
-
           <InputField
             type="text"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
           />
-          <Link href = "/pages/trainingLogsDashboard" className="w-full pt-2">
-            <button className="bg-red-500 text-white w-full rounded-l">Log In</button>
+
+          <Link href = "/pages/trainingLogsDashboard" className="w-full pt-4">
+            <button className="bg-red-500 text-white w-full text-lg rounded-lg p-0.5 font-medium">Log in</button>
           </Link>
-          <p>Don't have a login? <Link href="/pages/createAccount" className="font-bold">Sign up</Link></p>
+
+          <div className="text-xs"><p>Don't have an account? <Link href="/pages/createAccount" className="font-bold">Sign up</Link></p></div>
         </div>
-        <div className="pb-4">
+        <div className="pb-4 text-xs">
           <p>Made with ♥ by Euan, Gia, and Tiffany</p>
         </div>
       </div>
@@ -48,7 +49,6 @@ export default function LogIn() {
         height={200}
         className="absolute bottom-0 left-0"
       />
-
 
     </div>
   );
