@@ -13,7 +13,7 @@ export default function SideBar () {
             <SideRoute image="/images/inactiveAnimalLogo.png" text="Animals" />
           </div>
           <div>
-            <p>Admin Access</p>
+            <p className="">Admin Access</p>
             <SideRoute
               image="/images/inactiveAllTrainingLogo.png"
               text="All Training"
