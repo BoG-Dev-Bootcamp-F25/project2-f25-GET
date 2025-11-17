@@ -26,8 +26,8 @@ const trainingLogSchema = new Schema ({
         type: Number,
         required: true
     }
-});
+}, { collection: 'traininglogs' });
 
-export const Tree: Model<InferSchemaType<typeof trainingLogSchema>> = models.TrainingLog ?? model('TrainingLog', trainingLogSchema);
+export const TrainingLog: Model<InferSchemaType<typeof trainingLogSchema>> = models.TrainingLog ?? model('TrainingLog', trainingLogSchema);
 
-export default mongoose.models?.TrainingLog || mongoose.model("traininglogs", trainingLogSchema);
+export default mongoose.models?.TrainingLog || mongoose.model("TrainingLog", trainingLogSchema);
