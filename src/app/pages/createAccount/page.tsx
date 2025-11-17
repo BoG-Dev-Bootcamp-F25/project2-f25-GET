@@ -4,6 +4,7 @@ import Image from 'next/image';
 import TopBar from '../../components/TopBar';
 import InputField from '../../components/InputField';
 import { useState } from 'react';
+import { useRouter } from "next/navigation";
 import Link from 'next/link';
 
 export default function CreateAccount() {
@@ -11,7 +12,12 @@ export default function CreateAccount() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const router = useRouter();
 
+  const handleSignUp = () => {
+    localStorage.setItem('userFullName', fullName);
+    router.push('/');
+  }
   return (
     <div>
       <TopBar />

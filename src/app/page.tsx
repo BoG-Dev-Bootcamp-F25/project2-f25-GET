@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from "next/navigation";
 import InputField from './components/InputField'
 import Link from 'next/link';
 import TopBar from './components/TopBar';
@@ -9,13 +10,29 @@ import Image from 'next/image';
 export default function LogIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const router = useRouter();
 
+  const handleLogin = async () => {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (!res.ok) {
+      return;
+    }
+
+    const data = await res.json();
+    localStorage.setItem("userFullName", data.fullName);
+
+    router.push("/dashboard");
+  };
   return (
     <div>
       <TopBar />
 
       <div className="h-[calc(100vh-64px)] flex flex-col justify-between items-center">
-        <div></div>
         <div className="flex flex-col w-full justify-center items-center max-w-md space-y-5 text-xs">
           <p className="text-[30px] font-bold">Login</p>
           <InputField
