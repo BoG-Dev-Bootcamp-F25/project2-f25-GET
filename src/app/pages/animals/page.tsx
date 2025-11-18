@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import TopBar from "../../components/TopBar";
 import SideBar from "../../components/SideBar";
 import Image from 'next/image';
@@ -20,6 +21,17 @@ const dummyAnimals = [
 
 
 export default function AnimalsPage() {
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
+  useEffect(() => {
+    const storedUserId = localStorage.getItem('userId');
+    const storedIsAdmin = localStorage.getItem('isAdmin');
+    
+    setUserId(storedUserId);
+    setIsAdmin(storedIsAdmin === 'true');
+  }, []);
+
   return (
     <div className="h-screen flex flex-col">
       <TopBar />
