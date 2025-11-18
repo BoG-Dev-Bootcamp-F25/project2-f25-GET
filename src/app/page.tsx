@@ -29,6 +29,7 @@ export default function LogIn() {
         const data = await response.json();
         localStorage.setItem('userId', data.id);
         localStorage.setItem('isAdmin', data.admin);
+        localStorage.setItem('userFullName', data.fullName);
         
         router.push('/pages/trainingLogsDashboard');
       } else {

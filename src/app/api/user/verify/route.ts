@@ -22,7 +22,8 @@ export const POST = async (
 
         return Response.json({
             id: user._id,
-            admin: user.admin
+            admin: user.admin,
+            fullName: user.fullName
         }, { status: 200});
     } catch (error) {
         console.error("Error in route", error);

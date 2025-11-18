@@ -2,8 +2,7 @@
 
 import Image from 'next/image';
 import TopBar from '../../components/TopBar';
-import InputField from '../../components/InputField';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import SideBar from '../../components/SideBar';
 import TrainingLogCard from '../../components/TrainingLogCard';
@@ -43,13 +42,27 @@ const dummyLogs = [
 ];
 // END OF FAKE DATA TO DELETE LATER
 
-
 export default function TrainingLogsDashboard() {
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [userName, setUserName] = useState<string>("");
+
+  useEffect(() => {
+    // Get user info from localStorage
+    const storedUserId = localStorage.getItem('userId');
+    const storedIsAdmin = localStorage.getItem('isAdmin');
+    const storedUserName = localStorage.getItem('userFullName');
+    
+    setUserId(storedUserId);
+    setIsAdmin(storedIsAdmin === 'true');
+    setUserName(storedUserName || "");
+  }, []);
+
   return (
     <div className="h-screen flex flex-col">
       <TopBar />
       <div className="flex flex-1">
-        <SideBar />
+        <SideBar userName={userName} isAdmin={isAdmin}/>
         
         <main className="flex-1 p-10 w-full bg-gray-50">
           
@@ -58,7 +71,7 @@ export default function TrainingLogsDashboard() {
             <h1 className="text-2xl font-normal text-gray-700">Training logs</h1>
             
             {/* create new */}
-            <Link href="/pages/create-log"> {/* CONNECT THIS TO REAL CREATE LOG PAGE-I JUST DON'T KNOW WHAT THAT IS RIGHT NOW */}
+            <Link href="/pages/create-log">
               <button className="flex items-center text-gray-700 font-medium hover:text-indigo-600 transition">
                 <Image
                   src="/images/createNewLogo.png"
@@ -71,7 +84,7 @@ export default function TrainingLogsDashboard() {
             </Link>
           </div>
 
-          <hr className="border-gray-200 mb-6" /> {/* MAYBE CHANGE THIS LATER TO MATCH FIGMA (EXTEND FULL WIDTH), BUT I LIKE HOW THIS LOOKS BETTER */}
+          <hr className="border-gray-200 mb-6" />
 
           {/* log list */}
           <div className="flex flex-col space-y-5">

@@ -3,14 +3,12 @@ import SideRoute from "../components/SideRoute";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function SideBar() {
-  const [userName, setUserName] = useState<string | null>(null);
+type Props = {
+  userName?: string;
+  isAdmin: boolean;
+};
 
-  useEffect(() => {
-    const storedName = localStorage.getItem("userFullName");
-    if (storedName) setUserName(storedName);
-  }, []);
-
+export default function SideBar({ userName, isAdmin }: Props) {
   return (
     <div
       className="h-full flex flex-col items-center border-r-3 border-gray-100
@@ -32,29 +30,31 @@ export default function SideBar() {
           />
         </div>
 
-        <div className="w-full px-3">
-          <p className="pt-3 text-xs sm:text-sm md:text-base lg:text-m mx-5 font-semibold">
-            Admin Access
-          </p>
-          <SideRoute
-            activeImage="/images/activeAllTrainingLogo.png"
-            inactiveImage="/images/inactiveAllTrainingLogo.png"
-            text="All Training"
-            href="/pages/all-training"
-          />
-          <SideRoute
-            activeImage="/images/activeAllAnimalsLogo.png"
-            inactiveImage="/images/inactiveAllAnimalsLogo.png"
-            text="All Animals"
-            href="/pages/all-animals"
-          />
-          <SideRoute
-            activeImage="/images/activeAllUsersLogo.png"
-            inactiveImage="/images/inactiveAllUsersLogo.png"
-            text="All Users"
-            href="/pages/all-users"
-          />
-        </div>
+        {isAdmin && (
+          <div className="w-full px-3">
+            <p className="pt-3 text-xs sm:text-sm md:text-base lg:text-m mx-5 font-semibold">
+              Admin Access
+            </p>
+            <SideRoute
+              activeImage="/images/activeAllTrainingLogo.png"
+              inactiveImage="/images/inactiveAllTrainingLogo.png"
+              text="All Training"
+              href="/pages/all-training"
+            />
+            <SideRoute
+              activeImage="/images/activeAllAnimalsLogo.png"
+              inactiveImage="/images/inactiveAllAnimalsLogo.png"
+              text="All Animals"
+              href="/pages/all-animals"
+            />
+            <SideRoute
+              activeImage="/images/activeAllUsersLogo.png"
+              inactiveImage="/images/inactiveAllUsersLogo.png"
+              text="All Users"
+              href="/pages/all-users"
+            />
+          </div>
+        )}
       </div>
 
       <div className="mt-auto w-full flex justify-center">
@@ -71,7 +71,7 @@ export default function SideBar() {
                 {userName ?? "User"}
               </h3>
               <p className=" text-sm sm:text-xs md:text-base lg:text-sm">
-                Admin
+                {isAdmin ? "Admin" : "Trainer"}
               </p>
             </div>
           </div>
