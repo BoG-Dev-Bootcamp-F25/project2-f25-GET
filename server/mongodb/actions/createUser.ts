@@ -12,7 +12,7 @@ async function createUser(
     try {
         await connectDB();
         const hash = await argon2.hash(password);
-        const newUser = new User({ fullName, email, password: hash, admin });
+        const newUser = new User({ fullName, email: email.toLowerCase(), password: hash, admin });
         await newUser.save();
     } catch (error) {
         throw false;

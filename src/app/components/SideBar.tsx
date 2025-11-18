@@ -17,6 +17,20 @@ export default function SideBar () {
             <SideRoute
               image="/images/inactiveTrainingLogs.png"
               text="Training Logs"
+      <div className="w-[20%] flex flex-col border-r-3 border-gray-100 justify-center items-center">
+        <div>
+          <div className="w-[100%] border-b-2 border-gray-300">
+            <SideRoute
+              image="/images/inactiveTrainingLogs.png"
+              text="Training Logs"
+            />
+            <SideRoute image="/images/inactiveAnimalLogo.png" text="Animals" />
+          </div>
+          <div>
+            <p className="">Admin Access</p>
+            <SideRoute
+              image="/images/inactiveAllTrainingLogo.png"
+              text="All Training"
             />
             <SideRoute image="/images/inactiveAnimalLogo.png" text="Animals" />
           </div>
