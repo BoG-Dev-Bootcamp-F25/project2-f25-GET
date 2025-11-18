@@ -12,12 +12,33 @@ export default function CreateAccount() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
 
-  const handleSignUp = () => {
-    localStorage.setItem('userFullName', fullName);
-    router.push('/');
-  }
+  const handleSignUp = async () => {
+    const res = await fetch("/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fullName,
+        email,
+        password,
+        admin: isAdmin,
+      }),
+    });
+    if (!res.ok) {
+      console.error("Failed to create user");
+      return;
+    }
+
+    const data = await res.json();
+    console.log("Created user:", data);  
+
+    localStorage.setItem("userFullName", fullName);
+    localStorage.setItem("userIsAdmin", String(isAdmin));
+
+    router.push("/pages/trainingLogsDashboard");
+  };
   return (
     <div>
       <TopBar />
@@ -56,6 +77,8 @@ export default function CreateAccount() {
               type="checkbox"
               id="adminAccess"
               className="w-5 h-5 border-2 border-red-600 rounded-sm checked:accent-red-700"
+              checked={isAdmin}
+              onChange={(e) => setIsAdmin(e.target.checked)}
             />
             <label htmlFor="adminAccess" className="text-gray-600 ">
               Admin access
@@ -63,7 +86,10 @@ export default function CreateAccount() {
           </div>
 
           <Link href="/" className="w-full pt-2">
-            <button className="bg-red-700 text-white w-full rounded-xl p-3 mb-4 font-bold text-xl">
+            <button
+              onClick={handleSignUp}
+              className="bg-red-700 text-white w-full rounded-xl p-3 mb-4 font-bold text-xl"
+            >
               Sign Up
             </button>
           </Link>
