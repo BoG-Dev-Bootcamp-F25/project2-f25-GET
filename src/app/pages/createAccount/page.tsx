@@ -13,14 +13,13 @@ export default function CreateAccount() {
   const [confirmPassword, setConfirmPassword] = useState('');
 
   return (
-
-      <div>
+    <div>
       <TopBar />
-        
+
       <div className="h-[calc(100vh-64px)] flex flex-col justify-between items-center">
         <div></div>
         <div className="flex flex-col w-full justify-center items-center max-w-md">
-          <p className="text-[30px] font-bold">Login</p>
+          <p className="text-[30px] font-bold">Create Account</p>
           <InputField
             type="text"
             value={fullName}
@@ -46,22 +45,29 @@ export default function CreateAccount() {
             placeholder="Confirm Password"
           />
 
-          <div className="w-full flex items-center gap-2 pt-2">
+          <div className="w-full flex items-center gap-2 mt-7 mb-5">
             <input
               type="checkbox"
               id="adminAccess"
-              className="w-4 h-4 accent-red-500"
+              className="w-5 h-5 border-2 border-red-600 rounded-sm checked:accent-red-700"
             />
-            <label htmlFor="adminAccess" className="text-gray-600">Admin access</label>
-
+            <label htmlFor="adminAccess" className="text-gray-600 ">
+              Admin access
+            </label>
           </div>
 
-          <Link href = "/" className="w-full pt-2">
-            <button className="bg-red-500 text-white w-full">Sign Up</button>
+          <Link href="/" className="w-full pt-2">
+            <button className="bg-red-700 text-white w-full rounded-xl p-3 mb-4 font-bold text-xl">
+              Sign Up
+            </button>
           </Link>
 
-
-          <p>Already have an account? <Link href="/" className="font-bold">Log In</Link></p>
+          <p className=" text-[16px] m-4">
+            Already have an account?{" "}
+            <Link href="/" className="font-bold">
+              Log In
+            </Link>
+          </p>
         </div>
         <div className="pb-4">
           <p>Made with ♥ by Euan, Gia, and Tiffany</p>
@@ -74,8 +80,6 @@ export default function CreateAccount() {
         height={200}
         className="absolute bottom-0 left-0"
       />
-
-
     </div>
   );
 }

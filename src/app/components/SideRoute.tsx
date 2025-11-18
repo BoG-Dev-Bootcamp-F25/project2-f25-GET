@@ -8,7 +8,7 @@ type Props = {
 
 export default function SideRoute ({image, text}: Props) {
     return (
-        <div className="w-full text-[50] flex items-center gap-2">
+        <div className="w-full text-[50] flex items-center gap-2 p-2">
             <Image
                 src={image}
                 alt={text}

@@ -14,17 +14,18 @@ export default function CreateAccount() {
   const [confirmPassword, setConfirmPassword] = useState('');
 
   return (
-
     <div>
-        <TopBar />
-        <div className="flex flex-row">
-            <SideBar></SideBar>
-            <div>
-                <p>This is where the feed should go!?</p>
-                <p>this is the training log page</p>
-                <Link href="/"><button className="bg-red-500 text-white w-full">Log out</button></Link>
-            </div>
+      <TopBar />
+      <div className="flex flex-row">
+        <SideBar></SideBar>
+        <div>
+          <p>This is where the feed should go!?</p>
+          <p>this is the training log page</p>
+          <Link href="/">
+            <button className="bg-red-500 text-white w-full">Log out</button>
+          </Link>
         </div>
+      </div>
     </div>
   );
 }
