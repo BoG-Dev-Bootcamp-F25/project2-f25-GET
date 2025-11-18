@@ -12,7 +12,7 @@ export default function CreateAccount() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [admin, setAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -35,7 +35,7 @@ export default function CreateAccount() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ fullName, email, password, admin }),
+        body: JSON.stringify({ fullName, email, password, admin: isAdmin }),
       });
 
       if (response.ok) {
@@ -67,7 +67,6 @@ export default function CreateAccount() {
       setLoading(false);
     }
   };
-
   return (
     <div>
       <TopBar />
@@ -105,8 +104,8 @@ export default function CreateAccount() {
             <input
               type="checkbox"
               id="adminAccess"
-              checked={admin}
-              onChange={(e) => setAdmin(e.target.checked)}
+              checked={isAdmin}
+              onChange={(e) => setIsAdmin(e.target.checked)}
               className="w-5 h-5 border-2 border-red-600 rounded-sm checked:accent-red-700"
             />
             <label htmlFor="adminAccess" className="text-gray-600 ">
@@ -129,7 +128,7 @@ export default function CreateAccount() {
             </Link>
           </p>
         </div>
-        <div className="pb-4">
+        <div className="pb-4 text-xs">
           <p>Made with ♥ by Euan, Gia, and Tiffany</p>
         </div>
       </div>

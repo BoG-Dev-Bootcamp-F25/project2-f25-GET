@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from "next/navigation";
 import InputField from './components/InputField'
 import Link from 'next/link';
 import TopBar from './components/TopBar';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 
 export default function LogIn() {
   const [email, setEmail] = useState('');
@@ -40,7 +40,6 @@ export default function LogIn() {
       setLoading(false);
     }
   };
-
   return (
     <div>
       <TopBar />
