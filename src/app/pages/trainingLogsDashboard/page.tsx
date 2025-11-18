@@ -14,16 +14,13 @@ export default function CreateAccount() {
   const [confirmPassword, setConfirmPassword] = useState('');
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col">
       <TopBar />
-      <div className="flex flex-row">
+      <div className="flex flex-1 flex-row">
         <SideBar></SideBar>
-        <div>
+        <div className="flex-1 p-4">
           <p>This is where the feed should go!?</p>
           <p>this is the training log page</p>
-          <Link href="/">
-            <button className="bg-red-500 text-white w-full">Log out</button>
-          </Link>
         </div>
       </div>
     </div>
