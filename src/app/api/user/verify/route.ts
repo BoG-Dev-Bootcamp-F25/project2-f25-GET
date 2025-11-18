@@ -1,24 +1,29 @@
-import createUser from "../../../../server/mongodb/actions/createUser";
+import verifyUser from "../../../../../server/mongodb/actions/user/verifyUser";
 
 export const POST = async (
     req: Request
 ): Promise<Response> => {
     try {
         const body = await req.json();
-        const { fullName, email, password, admin } = body ?? {};
+        const { email, password } = body ?? {};
 
         if (
-            typeof fullName !== 'string' ||
             typeof email !== 'string' ||
-            typeof password !== 'string' ||
-            typeof admin !== 'boolean'
+            typeof password !== 'string'
         ) {
             return new Response("Invalid input", { status: 400});
         }
         
-        await createUser(fullName, email, password, admin);
+        const user = await verifyUser(email, password);
 
-        return new Response("Success", { status: 200});
+        if (!user) {
+            return new Response("Invalid creds", { status: 400 });
+        }
+
+        return Response.json({
+            id: user._id,
+            admin: user.admin
+        }, { status: 200});
     } catch (error) {
         console.error("Error in route", error);
         return new Response("Failed", { status: 500});
@@ -28,7 +33,7 @@ export const POST = async (
 /*
 sample usage
 POST
-http://localhost:3000/api/user
+http://localhost:3000/api/createUser
 {
     "fullName": "Euan Ham",
     "email": "Euanham05@gmail.com",
