@@ -5,12 +5,68 @@ import TopBar from '../../components/TopBar';
 import InputField from '../../components/InputField';
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function CreateAccount() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [admin, setAdmin] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleAccountCreation = async () => {
+    if (password !== confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+
+    if (!fullName || !email || !password) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fullName, email, password, admin }),
+      });
+
+      if (response.ok) {
+        const verifyResponse = await fetch('/api/user/verify', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (verifyResponse.ok) {
+          const data = await verifyResponse.json();
+          localStorage.setItem('userId', data.id);
+          localStorage.setItem('isAdmin', data.admin);
+          
+          router.push('/pages/trainingLogsDashboard');
+        } else {
+          alert('Account created but login failed.');
+          router.push('/');
+        }
+      } else {
+        const errorText = await response.text();
+        alert(`Failed to create account: ${errorText}`);
+      }
+    } catch (err) {
+      alert('Something went wrong.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div>
@@ -27,19 +83,19 @@ export default function CreateAccount() {
             placeholder="Full Name"
           />
           <InputField
-            type="text"
+            type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
           />
           <InputField
-            type="text"
+            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
           />
           <InputField
-            type="text"
+            type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="Confirm Password"
@@ -49,6 +105,8 @@ export default function CreateAccount() {
             <input
               type="checkbox"
               id="adminAccess"
+              checked={admin}
+              onChange={(e) => setAdmin(e.target.checked)}
               className="w-5 h-5 border-2 border-red-600 rounded-sm checked:accent-red-700"
             />
             <label htmlFor="adminAccess" className="text-gray-600 ">
@@ -56,11 +114,13 @@ export default function CreateAccount() {
             </label>
           </div>
 
-          <Link href="/" className="w-full pt-2">
-            <button className="bg-red-700 text-white w-full rounded-xl p-3 mb-4 font-bold text-xl">
-              Sign Up
-            </button>
-          </Link>
+          <button 
+            onClick={handleAccountCreation}
+            disabled={loading}
+            className="bg-red-700 text-white w-full rounded-xl p-3 mb-4 font-bold text-xl disabled:opacity-50"
+          >
+            {loading ? 'Creating Account...' : 'Sign Up'}
+          </button>
 
           <p className=" text-[16px] m-4">
             Already have an account?{" "}

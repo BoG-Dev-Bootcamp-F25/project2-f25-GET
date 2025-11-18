@@ -34,7 +34,7 @@ export default function LogIn() {
       } else {
         alert('Invalid email or password');
       }
-    } catch (err) {
+    } catch (error) {
       alert('Something went wrong.');
     } finally {
       setLoading(false);
