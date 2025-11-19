@@ -7,45 +7,22 @@ import Link from 'next/link';
 import SideBar from '../../components/SideBar';
 import TrainingLogCard from '../../components/TrainingLogCard';
 
-// FAKE DATA FOR TESTING; DON'T FORGET TO PULL FROM DATABASE LATER
-const dummyLogs = [
-  {
-    id: 1,
-    title: 'Complete sit lessons',
-    date: new Date('2023-10-20T10:00:00Z'),
-    hours: 20,
-    ownerName: 'Long Lam',
-    animalName: 'Lucy',
-    animalBreed: 'Golden Retriever',
-    description: 'Lucy finishes the sit lessons very well today. Should give her a treat',
-  },
-  {
-    id: 2,
-    title: 'Advanced fetch training',
-    date: new Date('2023-10-19T11:00:00Z'),
-    hours: 2,
-    ownerName: 'Long Lam',
-    animalName: 'Lucy',
-    animalBreed: 'Golden Retriever',
-    description: 'Practiced long-distance recall and fetch. Good progress.',
-  },
-  {
-    id: 3,
-    title: 'Leash manners',
-    date: new Date('2023-10-18T14:00:00Z'),
-    hours: 1,
-    ownerName: 'Long Lam',
-    animalName: 'Lucy',
-    animalBreed: 'Golden Retriever',
-    description: 'Worked on not pulling. Still needs some work.',
-  },
-];
-// END OF FAKE DATA TO DELETE LATER
+interface TrainingLog {
+  _id: string;
+  title: string;
+  date: string;
+  hours: number;
+  description: string;
+  user: string;
+  animal: string;
+}
 
 export default function TrainingLogsDashboard() {
   const [userId, setUserId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>("");
+  const [trainingLogs, setTrainingLogs] = useState<TrainingLog[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Get user info from localStorage
@@ -56,7 +33,28 @@ export default function TrainingLogsDashboard() {
     setUserId(storedUserId);
     setIsAdmin(storedIsAdmin === 'true');
     setUserName(storedUserName || "");
+
+    fetchTrainingLogs(storedUserId);
   }, []);
+
+  const fetchTrainingLogs = async (currentUserId: string | null) => {
+    try {
+      const response = await fetch('/api/admin/training');
+      if (response.ok) {
+        const data = await response.json();
+        const userLogs = currentUserId
+          ? data.filter((log: TrainingLog) => log.user === currentUserId)
+          : [];
+        setTrainingLogs(userLogs);
+      } else {
+        console.error("Failed to get logs");
+      }
+    } catch (error) {
+      console.error("Error getting training logs:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="h-screen flex flex-col">
@@ -87,11 +85,30 @@ export default function TrainingLogsDashboard() {
           <hr className="border-gray-200 mb-6" />
 
           {/* log list */}
-          <div className="flex flex-col space-y-5">
-            {dummyLogs.map((log) => (
-              <TrainingLogCard key={log.id} log={log} />
-            ))}
-          </div>
+          {loading ? (
+            <p>Loading training logs</p>
+          ) : trainingLogs.length === 0 ? (
+            <p>No training logs found!</p>
+          ) : (
+            <div className="flex flex-col space-y-5">
+              {trainingLogs.map((log) => (
+                <TrainingLogCard
+                  key={log._id}
+                  log={{
+                    title: log.title,
+                    date: new Date(log.date),
+                    hours: log.hours,
+                    ownerName: userName,
+                    animalName: 'Animal',
+                    animalBreed: 'Breed',
+                    description: log.description,
+                  }}
+                />
+              ))
+              }
+            </div>
+          )}
+
           
         </main>
       </div>
