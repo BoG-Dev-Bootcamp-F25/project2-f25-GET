@@ -7,23 +7,21 @@ import Image from 'next/image';
 import Link from 'next/link';
 import AnimalCard from '../../components/AnimalCard';
 
-// FAKE DATA TO REPLACE LATER YAK
-const placeholderImageUrl = '/images/dog2.png'; // do we need to change?
-const dummyAnimals = [
-  { id: 1, name: 'Lucy', breed: 'Golden Retriever', ownerName: 'Long Lam', hoursTrained: 100, imageUrl: placeholderImageUrl },
-  { id: 2, name: 'Lucy', breed: 'Golden Retriever', ownerName: 'Long Lam', hoursTrained: 100, imageUrl: placeholderImageUrl },
-  { id: 3, name: 'Lucy', breed: 'Golden Retriever', ownerName: 'Long Lam', hoursTrained: 100, imageUrl: placeholderImageUrl },
-  { id: 4, name: 'Lucy', breed: 'Golden Retriever', ownerName: 'Long Lam', hoursTrained: 100, imageUrl: placeholderImageUrl },
-  { id: 5, name: 'Lucy', breed: 'Golden Retriever', ownerName: 'Long Lam', hoursTrained: 100, imageUrl: placeholderImageUrl },
-  { id: 6, name: 'Lucy', breed: 'Golden Retriever', ownerName: 'Long Lam', hoursTrained: 100, imageUrl: placeholderImageUrl },
-];
-// END TO DELETE
-
+interface Animal {
+  _id: string;
+  name: string;
+  breed: string;
+  owner: string;
+  hoursTrained: number;
+  profilePicture: string;
+}
 
 export default function AnimalsPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>("");
+  const [animals, setAnimals] = useState<Animal[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedUserId = localStorage.getItem('userId');
@@ -32,8 +30,29 @@ export default function AnimalsPage() {
 
     setUserId(storedUserId);
     setIsAdmin(storedIsAdmin === 'true');
-    setUserName(storedUserName || "")
+    setUserName(storedUserName || "");
+
+    fetchAnimals(storedUserId);
   }, []);
+
+  const fetchAnimals = async (currentUserId: string | null) => {
+    try {
+      const response = await fetch('/api/admin/animals');
+      if (response.ok) {
+        const data = await response.json();
+        const userAnimals = currentUserId
+          ? data.filter((animal: Animal) => animal.owner === currentUserId)
+          : [];
+        setAnimals(userAnimals);
+      } else {
+        console.error("Failed to get animals");
+      }
+    } catch (error) {
+      console.error("Error getting animals:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="h-screen flex flex-col">
@@ -48,7 +67,7 @@ export default function AnimalsPage() {
             <h1 className="text-2xl font-normal text-gray-700">Animals</h1>
             
             {/* create new */}
-            <Link href="/pages/create-animal"> {/* AGAIN CHANGE THIS LATER TO THE RIGHT LINK */}
+            <Link href="/pages/create-animal">
               <button className="flex items-center text-gray-700 font-medium hover:text-indigo-600 transition">
                 <Image
                   src="/images/createNewLogo.png"
@@ -63,12 +82,27 @@ export default function AnimalsPage() {
 
           <hr className="border-gray-200 mb-6" />
 
-          {/*make it a grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {dummyAnimals.map((animal) => (
-              <AnimalCard key={animal.id} animal={animal} />
-            ))}
-          </div>
+          {/* animals grid */}
+          {loading ? (
+            <p>Loading animals</p>
+          ) : animals.length === 0 ? (
+            <p>No animals found!</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {animals.map((animal) => (
+                <AnimalCard 
+                  key={animal._id} 
+                  animal={{
+                    name: animal.name,
+                    breed: animal.breed,
+                    ownerName: userName,
+                    hoursTrained: animal.hoursTrained,
+                    imageUrl: animal.profilePicture,
+                  }} 
+                />
+              ))}
+            </div>
+          )}
           
         </main>
       </div>
