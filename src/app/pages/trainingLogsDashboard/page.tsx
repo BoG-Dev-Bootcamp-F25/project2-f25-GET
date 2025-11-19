@@ -14,7 +14,13 @@ interface TrainingLog {
   hours: number;
   description: string;
   user: string;
-  animal: string;
+  animal: string; 
+}
+
+interface Animal {
+  _id: string;
+  name: string;
+  breed: string;
 }
 
 export default function TrainingLogsDashboard() {
@@ -22,6 +28,7 @@ export default function TrainingLogsDashboard() {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>("");
   const [trainingLogs, setTrainingLogs] = useState<TrainingLog[]>([]);
+  const [animals, setAnimals] = useState<Record<string, Animal>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,7 +41,16 @@ export default function TrainingLogsDashboard() {
     setIsAdmin(storedIsAdmin === 'true');
     setUserName(storedUserName || "");
 
-    fetchTrainingLogs(storedUserId);
+    // both logs and animals
+    const fetchData = async () => {
+      await Promise.all([
+        fetchTrainingLogs(storedUserId),
+        fetchAnimals()
+      ]);
+      setLoading(false);
+    };
+
+    fetchData();
   }, []);
 
   const fetchTrainingLogs = async (currentUserId: string | null) => {
@@ -51,8 +67,24 @@ export default function TrainingLogsDashboard() {
       }
     } catch (error) {
       console.error("Error getting training logs:", error);
-    } finally {
-      setLoading(false);
+    }
+  }
+
+  const fetchAnimals = async () => {
+    try {
+      const response = await fetch('/api/admin/animals');
+      if (response.ok) {
+        const data: Animal[] = await response.json();
+        const animalMap = data.reduce((acc, animal) => {
+          acc[animal._id] = animal;
+          return acc;
+        }, {} as Record<string, Animal>);
+        setAnimals(animalMap);
+      } else {
+        console.error("Failed to get animals");
+      }
+    } catch (error) {
+      console.error("Error getting animals:", error);
     }
   }
 
@@ -91,21 +123,24 @@ export default function TrainingLogsDashboard() {
             <p>No training logs found!</p>
           ) : (
             <div className="flex flex-col space-y-5">
-              {trainingLogs.map((log) => (
-                <TrainingLogCard
-                  key={log._id}
-                  log={{
-                    title: log.title,
-                    date: new Date(log.date),
-                    hours: log.hours,
-                    ownerName: userName,
-                    animalName: 'Animal',
-                    animalBreed: 'Breed',
-                    description: log.description,
-                  }}
-                />
-              ))
-              }
+              {trainingLogs.map((log) => {
+                const animal = animals[log.animal];
+                
+                return (
+                  <TrainingLogCard
+                    key={log._id}
+                    log={{
+                      title: log.title,
+                      date: new Date(log.date),
+                      hours: log.hours,
+                      ownerName: userName,
+                      animalName: animal ? animal.name : 'Animal',
+                      animalBreed: animal ? animal.breed : 'Breed',
+                      description: log.description,
+                    }}
+                  />
+                );
+              })}
             </div>
           )}
 
