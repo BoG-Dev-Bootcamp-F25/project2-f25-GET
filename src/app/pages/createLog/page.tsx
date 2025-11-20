@@ -6,19 +6,10 @@ import TopBar from "../../components/TopBar";
 import SideBar from "../../components/SideBar";
 import { useAuth } from "../../hooks/useAuth";
 
-// FAKE
-const dummyAnimals = [
-  { _id: 'animal123', name: 'Lucy - Golden Retriever' },
-  { _id: 'animal456', name: 'Max - Labrador' },
-  { _id: 'animal789', name: 'Buddy - Beagle' },
-];
-
 type AnimalOption = {
   _id: string;
   name: string;
 };
-// END FAKE
-
 
 const currentYear = new Date().getFullYear();
 const months = [
@@ -50,12 +41,37 @@ export default function CreateLogPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingAnimals, setLoadingAnimals] = useState(true);
 
   useEffect(() => {
-    // API CALL
-    setAnimals(dummyAnimals);
-    // ---
-  }, []);
+    if (authLoading) return;
+    if (!user) return;
+
+    const fetchUserAnimals = async () => {
+      try {
+        const params = new URLSearchParams();
+        params.set('ownerId', user.id);
+        params.set('limit', '100');
+
+        const response = await fetch(`/api/admin/animals?${params.toString()}`, {
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setAnimals(data);
+        } else {
+          console.error('Failed to fetch animals');
+        }
+      } catch (error) {
+        console.error('Error fetching animals:', error);
+      } finally {
+        setLoadingAnimals(false);
+      }
+    };
+
+    fetchUserAnimals();
+  }, [authLoading, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,7 +98,6 @@ export default function CreateLogPage() {
       return;
     }
 
-    // euan hook up
     const logData = {
       user: user.id,
       animal: animalId,
@@ -92,20 +107,30 @@ export default function CreateLogPage() {
       date: fullDate,
     };
 
-    console.log('FAKE SUBMIT');
-    console.log('Submitting this data to /api/training:', logData);
-    
-    // fake API call for frontend test
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    console.log('FAKE SUCCESS');
-    setSuccess('Training log created successfully! Redirecting...');
-    setIsSubmitting(false);
+    try {
+      const response = await fetch('/api/training', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(logData),
+        credentials: 'include',
+      });
 
-    // back to dash
-    setTimeout(() => {
-      router.push('/pages/trainingLogsDashboard');
-    }, 2000);
+      if (response.ok) {
+        setSuccess('Training log created successfully! Redirecting...');
+        setTimeout(() => {
+          router.push('/pages/trainingLogsDashboard');
+        }, 1500);
+      } else {
+        setError('Failed to create training log. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error creating training log:', error);
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
@@ -139,19 +164,23 @@ export default function CreateLogPage() {
                 <label htmlFor="animal" className="block text-sm font-bold text-gray-700">
                   Select Animal
                 </label>
-                <select
-                  id="animal"
-                  value={animalId}
-                  onChange={(e) => setAnimalId(e.target.value)}
-                  className="mt-1 block w-full p-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white"
-                >
-                  <option value="" disabled>Select an animal</option>
-                  {animals.map((animal) => (
-                    <option key={animal._id} value={animal._id}>
-                      {animal.name}
-                    </option>
-                  ))}
-                </select>
+                {loadingAnimals ? (
+                  <p className="text-gray-500">Loading animals...</p>
+                ) : (
+                  <select
+                    id="animal"
+                    value={animalId}
+                    onChange={(e) => setAnimalId(e.target.value)}
+                    className="mt-1 block w-full p-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                  >
+                    <option value="" disabled>Select an animal</option>
+                    {animals.map((animal) => (
+                      <option key={animal._id} value={animal._id}>
+                        {animal.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               <div>
