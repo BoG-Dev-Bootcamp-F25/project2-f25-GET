@@ -30,6 +30,10 @@ export default function TrainingLogsDashboard() {
   const [trainingLogs, setTrainingLogs] = useState<TrainingLog[]>([]);
   const [animals, setAnimals] = useState<Record<string, Animal>>({});
   const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageCursors, setPageCursors] = useState<(string | undefined)[]>([undefined]);
+  const LIMIT = 4;
 
   useEffect(() => {
     // Get user info from localStorage
@@ -43,30 +47,64 @@ export default function TrainingLogsDashboard() {
 
     // both logs and animals
     const fetchData = async () => {
-      await Promise.all([
-        fetchTrainingLogs(storedUserId),
+      const [logs] = await Promise.all([
+        fetchTrainingLogs(undefined, storedUserId),
         fetchAnimals()
       ]);
+
+      if (logs && logs.length === LIMIT) {
+        const lastId = logs[logs.length - 1]._id;
+        setPageCursors(prev => {
+          const newCursors = [...prev];
+          newCursors[1] = lastId;
+          return newCursors;
+        });
+      }
+
       setLoading(false);
     };
 
     fetchData();
   }, []);
 
-  const fetchTrainingLogs = async (currentUserId: string | null) => {
+  const fetchTrainingLogs = async (lastId?: string, currentUserId: string | null = null) => {
     try {
-      const response = await fetch('/api/admin/training');
+      const params = new URLSearchParams();
+      params.set('limit', LIMIT.toString());
+      if (lastId) params.set('lastId', lastId);
+
+      const response = await fetch(`/api/admin/training?${params.toString()}`);
       if (response.ok) {
-        const data = await response.json();
+        const data: TrainingLog[] = await response.json();
+
         const userLogs = currentUserId
           ? data.filter((log: TrainingLog) => log.user === currentUserId)
-          : [];
+          : data;
+
         setTrainingLogs(userLogs);
+        setHasMore(data.length === LIMIT);
+        return data;
       } else {
         console.error("Failed to get logs");
       }
     } catch (error) {
       console.error("Error getting training logs:", error);
+    }
+    return [] as TrainingLog[];
+  }
+
+  const handlePageChange = async (page: number) => {
+    const cursor = pageCursors[page - 1];
+    const data = await fetchTrainingLogs(cursor, userId);
+    setCurrentPage(page);
+
+    if (data && data.length === LIMIT) {
+      const lastId = data[data.length - 1]._id;
+      setPageCursors(prev => {
+        const newCursors = [...prev];
+        newCursors[page] = lastId;
+        return newCursors;
+      });
     }
   }
 
@@ -141,6 +179,34 @@ export default function TrainingLogsDashboard() {
                   />
                 );
               })}
+
+                  <div className="flex justify-start space-x-4 mt-4">
+                  <button 
+                    disabled={currentPage === 1} 
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    className="text-blue-600 hover:underline disabled:text-gray-400"
+                  >
+                    Previous
+                  </button>
+                
+                  {pageCursors.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handlePageChange(index + 1)}
+                      className={`hover:underline ${currentPage === index + 1 ? 'font-bold text-black' : 'text-blue-600'}`}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+                
+                  <button 
+                    disabled={!hasMore} 
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    className="text-blue-600 hover:underline disabled:text-gray-400"
+                  >
+                    Next
+                  </button>
+                  </div>
             </div>
           )}
 

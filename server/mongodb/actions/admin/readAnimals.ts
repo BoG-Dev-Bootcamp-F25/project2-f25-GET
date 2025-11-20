@@ -2,12 +2,19 @@ import connectDB from "../..";
 import Animal from "../../models/Animal";
 
 
-async function readAnimals() {
+async function readAnimals(lastId?: string, limit: number = 4, ownerId?: string) {
     try {
         await connectDB();
-        const animals = await Animal.find();
+
+        const query: any = {};
+        if (ownerId) query.owner = ownerId;
+        if (lastId) query._id = { $lt: lastId };
+
+        const animals = await Animal.find(query)
+            .sort({ _id: -1 })
+            .limit(limit);
+
         console.log("Found animals:", animals.length);
-        console.log("Animals:", animals);
         return animals;
     } catch (error) {
         console.error("Error reading animals:", error);

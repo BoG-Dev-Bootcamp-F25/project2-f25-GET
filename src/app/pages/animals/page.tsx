@@ -22,6 +22,10 @@ export default function AnimalsPage() {
   const [userName, setUserName] = useState<string>("");
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageCursors, setPageCursors] = useState<(string | undefined)[]>([undefined]);
+  const LIMIT = 6;
 
   useEffect(() => {
     const storedUserId = localStorage.getItem('userId');
@@ -32,18 +36,35 @@ export default function AnimalsPage() {
     setIsAdmin(storedIsAdmin === 'true');
     setUserName(storedUserName || "");
 
-    fetchAnimals(storedUserId);
+    // fetch first page of user's animals
+    fetchAnimals(undefined, storedUserId).then((data) => {
+      if (data && data.length === LIMIT) {
+        const lastId = data[data.length - 1]._id;
+        setPageCursors(prev => {
+          const newCursors = [...prev];
+          newCursors[1] = lastId;
+          return newCursors;
+        });
+      }
+    });
   }, []);
 
-  const fetchAnimals = async (currentUserId: string | null) => {
+  const fetchAnimals = async (lastId?: string, currentUserId: string | null = null) => {
     try {
-      const response = await fetch('/api/admin/animals');
+      const params = new URLSearchParams();
+      params.set('limit', LIMIT.toString());
+      if (lastId) params.set('lastId', lastId);
+      if (currentUserId) params.set('ownerId', currentUserId);
+
+      const response = await fetch(`/api/admin/animals?${params.toString()}`);
       if (response.ok) {
-        const data = await response.json();
+        const data: Animal[] = await response.json();
         const userAnimals = currentUserId
-          ? data.filter((animal: Animal) => animal.owner === currentUserId)
-          : [];
+          ? data
+          : data;
         setAnimals(userAnimals);
+        setHasMore(data.length === LIMIT);
+        return data;
       } else {
         console.error("Failed to get animals");
       }
@@ -52,7 +73,23 @@ export default function AnimalsPage() {
     } finally {
       setLoading(false);
     }
+    return [] as Animal[];
   };
+
+  const handlePageChange = async (page: number) => {
+    const cursor = pageCursors[page - 1];
+    const data = await fetchAnimals(cursor, userId);
+    setCurrentPage(page);
+
+    if (data && data.length === LIMIT) {
+      const lastId = data[data.length - 1]._id;
+      setPageCursors(prev => {
+        const newCursors = [...prev];
+        newCursors[page] = lastId;
+        return newCursors;
+      });
+    }
+  }
 
   return (
     <div className="h-screen flex flex-col">
@@ -88,6 +125,7 @@ export default function AnimalsPage() {
           ) : animals.length === 0 ? (
             <p>No animals found!</p>
           ) : (
+            <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {animals.map((animal) => (
                 <AnimalCard 
@@ -102,6 +140,35 @@ export default function AnimalsPage() {
                 />
               ))}
             </div>
+
+            <div className="flex justify-start space-x-4 mt-4">
+              <button 
+                  disabled={currentPage === 1} 
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  className="text-blue-600 hover:underline disabled:text-gray-400"
+              >
+                  Previous
+              </button>
+
+              {pageCursors.map((_, index) => (
+                  <button
+                      key={index}
+                      onClick={() => handlePageChange(index + 1)}
+                      className={`hover:underline ${currentPage === index + 1 ? 'font-bold text-black' : 'text-blue-600'}`}
+                  >
+                      {index + 1}
+                  </button>
+              ))}
+
+              <button 
+                  disabled={!hasMore} 
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  className="text-blue-600 hover:underline disabled:text-gray-400"
+              >
+                  Next
+              </button>
+            </div>
+            </>
           )}
           
         </main>

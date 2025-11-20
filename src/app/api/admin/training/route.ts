@@ -4,7 +4,11 @@ export const GET = async (
     req: Request
 ): Promise<Response> => {
     try {
-        const trainingLogs = await readTrainingLogs();
+        const { searchParams } = new URL(req.url);
+        const lastId = searchParams.get('lastId') ?? undefined;
+        const limit = parseInt(searchParams.get('limit') ?? '4');
+
+        const trainingLogs = await readTrainingLogs(lastId, limit);
         
         return Response.json(trainingLogs, { status: 200 });
     } catch (error) {
