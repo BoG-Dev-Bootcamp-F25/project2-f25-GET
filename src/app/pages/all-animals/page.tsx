@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import TopBar from "../../components/TopBar";
 import SideBar from "../../components/SideBar";
 import AnimalCard from "../../components/AnimalCard";
+import { useAuth } from "../../hooks/useAuth";
 
 interface Animal {
   _id: string;
@@ -20,9 +21,7 @@ interface User {
 }
 
 export default function AllAnimalsPage() {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const [userName, setUserName] = useState<string>("");
+  const { user } = useAuth();
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [users, setUsers] = useState<Record<string, User>>({});
   const [loading, setLoading] = useState(true);
@@ -33,14 +32,6 @@ export default function AllAnimalsPage() {
   const LIMIT = 6;
 
   useEffect(() => {
-    const storedUserId = localStorage.getItem('userId');
-    const storedIsAdmin = localStorage.getItem('isAdmin');
-    const storedUserName = localStorage.getItem('userFullName');
-    
-    setUserId(storedUserId);
-    setIsAdmin(storedIsAdmin === 'true');
-    setUserName(storedUserName || "");
-
     // Fetch first page of animals and all users
     const fetchData = async () => {
       const [data] = await Promise.all([
@@ -134,7 +125,7 @@ export default function AllAnimalsPage() {
     <div className="h-screen flex flex-col overflow-hidden">
       <TopBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
       <div className="flex flex-1 overflow-hidden">
-        <SideBar userName={userName} isAdmin={isAdmin} />
+        <SideBar userName={user?.fullName || ""} isAdmin={user?.admin || false} />
         
         <main className="flex-1 p-10 bg-gray-50 overflow-y-auto">
           

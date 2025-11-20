@@ -23,14 +23,10 @@ export default function LogIn() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
+        credentials: 'include',
       });
 
       if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem('userId', data.id);
-        localStorage.setItem('isAdmin', data.admin);
-        localStorage.setItem('userFullName', data.fullName);
-        
         router.push('/pages/trainingLogsDashboard');
       } else {
         alert('Invalid email or password');

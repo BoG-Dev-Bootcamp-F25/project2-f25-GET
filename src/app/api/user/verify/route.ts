@@ -1,4 +1,6 @@
 import verifyUser from "../../../../../server/mongodb/actions/user/verifyUser";
+import { signToken } from "../../../../../server/utils/jwt";
+import { cookies } from 'next/headers';
 
 export const POST = async (
     req: Request
@@ -20,10 +22,22 @@ export const POST = async (
             return new Response("Invalid creds", { status: 400 });
         }
 
-        return Response.json({
-            id: user._id,
+        const token = signToken({
+            id: user._id.toString(),
             admin: user.admin,
             fullName: user.fullName
+        });
+
+        const cookieStore = await cookies();
+        cookieStore.set('auth-token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 7 * 24 * 60 * 60
+        });
+
+        return Response.json({
+            success: true
         }, { status: 200});
     } catch (error) {
         console.error("Error in route", error);

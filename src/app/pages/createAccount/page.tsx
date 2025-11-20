@@ -45,14 +45,10 @@ export default function CreateAccount() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ email, password }),
+          credentials: 'include',
         });
 
         if (verifyResponse.ok) {
-          const data = await verifyResponse.json();
-          localStorage.setItem('userId', data.id);
-          localStorage.setItem('isAdmin', data.admin);
-          localStorage.setItem('userFullName', data.fullName);
-          
           router.push('/pages/trainingLogsDashboard');
         } else {
           alert('Account created but login failed.');

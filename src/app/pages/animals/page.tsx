@@ -6,6 +6,7 @@ import SideBar from "../../components/SideBar";
 import Image from 'next/image';
 import Link from 'next/link';
 import AnimalCard from '../../components/AnimalCard';
+import { useAuth } from "../../hooks/useAuth";
 
 interface Animal {
   _id: string;
@@ -17,9 +18,7 @@ interface Animal {
 }
 
 export default function AnimalsPage() {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const [userName, setUserName] = useState<string>("");
+  const { user, loading: authLoading } = useAuth();
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
@@ -29,16 +28,12 @@ export default function AnimalsPage() {
   const LIMIT = 6;
 
   useEffect(() => {
-    const storedUserId = localStorage.getItem('userId');
-    const storedIsAdmin = localStorage.getItem('isAdmin');
-    const storedUserName = localStorage.getItem('userFullName');
+    if (authLoading) return;
 
-    setUserId(storedUserId);
-    setIsAdmin(storedIsAdmin === 'true');
-    setUserName(storedUserName || "");
+    if (!user) return;
 
     // fetch first page of user's animals
-    fetchAnimals(undefined, storedUserId).then((data) => {
+    fetchAnimals(undefined, user.id).then((data) => {
       if (data && data.length === LIMIT) {
         const lastId = data[data.length - 1]._id;
         setPageCursors(prev => {
@@ -48,7 +43,7 @@ export default function AnimalsPage() {
         });
       }
     });
-  }, []);
+  }, [authLoading, user]);
 
   const fetchAnimals = async (lastId?: string, currentUserId: string | null = null) => {
     try {
@@ -60,9 +55,9 @@ export default function AnimalsPage() {
       const response = await fetch(`/api/admin/animals?${params.toString()}`);
       if (response.ok) {
         const data: Animal[] = await response.json();
-        const userAnimals = currentUserId
-          ? data
-          : data;
+        const userAnimals = data.filter((animal: Animal) => 
+          !currentUserId || animal.owner === currentUserId
+        );
         setAnimals(userAnimals);
         setHasMore(data.length === LIMIT);
         return data;
@@ -79,7 +74,7 @@ export default function AnimalsPage() {
 
   const handlePageChange = async (page: number) => {
     const cursor = pageCursors[page - 1];
-    const data = await fetchAnimals(cursor, userId);
+    const data = await fetchAnimals(cursor, user?.id);
     setCurrentPage(page);
 
     if (data && data.length === LIMIT) {
@@ -101,7 +96,7 @@ export default function AnimalsPage() {
     <div className="h-screen flex flex-col overflow-hidden">
       <TopBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
       <div className="flex flex-1 overflow-hidden">
-        <SideBar userName={userName} isAdmin={isAdmin} />
+        <SideBar userName={user?.fullName || ""} isAdmin={user?.admin || false} />
         
         <main className="flex-1 p-10 bg-gray-50 overflow-y-auto">
           
@@ -139,7 +134,7 @@ export default function AnimalsPage() {
                   animal={{
                     name: animal.name,
                     breed: animal.breed,
-                    ownerName: userName,
+                    ownerName: user?.fullName || "",
                     hoursTrained: animal.hoursTrained,
                     imageUrl: animal.profilePicture,
                   }} 

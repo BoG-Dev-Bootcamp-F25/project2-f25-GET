@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import TopBar from "../../components/TopBar";
 import SideBar from "../../components/SideBar";
+import { useAuth } from "../../hooks/useAuth";
 
 const currentYear = new Date().getFullYear();
 const months = [
@@ -23,6 +24,7 @@ const FormInput = ({ id, value, onChange, ...props }: any) => (
 
 export default function CreateAnimalPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [name, setName] = useState('');
   const [breed, setBreed] = useState('');
   const [hours, setHours] = useState('');
@@ -30,22 +32,9 @@ export default function CreateAnimalPage() {
   const [month, setMonth] = useState(months[new Date().getMonth()]);
   const [day, setDay] = useState(new Date().getDate().toString());
   const [year, setYear] = useState(currentYear.toString());
-  const [userId, setUserId] = useState<string | null>(null);
-  const [userName, setUserName] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    const storedUserId = localStorage.getItem('userId');
-    const storedUserName = localStorage.getItem('userFullName');
-    const storedIsAdmin = localStorage.getItem('isAdmin');
-
-    setUserId(storedUserId);
-    setUserName(storedUserName || '');
-    setIsAdmin(storedIsAdmin === 'true');
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +45,7 @@ export default function CreateAnimalPage() {
       setError('All fields except Note are required.');
       return;
     }
-    if (!userId) {
+    if (!user) {
       setError('Could not find user. Please log in again.');
       return;
     }
@@ -73,7 +62,7 @@ export default function CreateAnimalPage() {
 
     // weee backend
     const animalData = {
-      owner: userId,
+      owner: user.id,
       name,
       breed,
       hoursTrained: Number(hours),
@@ -107,7 +96,7 @@ export default function CreateAnimalPage() {
     <div className="h-screen flex flex-col overflow-hidden">
       <TopBar />
       <div className="flex flex-1 overflow-hidden">
-        <SideBar userName={userName} isAdmin={isAdmin} />
+        <SideBar userName={user?.fullName || ""} isAdmin={user?.admin || false} />
         
         <main className="flex-1 overflow-y-auto p-4 md:p-10 bg-gray-50">
           <h1 className="text-2xl font-normal text-gray-700">Animals</h1>

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import TopBar from "../../components/TopBar";
 import SideBar from "../../components/SideBar";
 import TrainingLogCard from "../../components/TrainingLogCard";
+import { useAuth } from "../../hooks/useAuth";
 
 interface TrainingLog {
   _id: string;
@@ -27,9 +28,7 @@ interface User {
 }
 
 export default function AllTrainingPage() {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const [userName, setUserName] = useState<string>("");
+  const { user } = useAuth();
   const [trainingLogs, setTrainingLogs] = useState<TrainingLog[]>([]);
   const [animals, setAnimals] = useState<Record<string, Animal>>({});
   const [users, setUsers] = useState<Record<string, User>>({});
@@ -41,13 +40,6 @@ export default function AllTrainingPage() {
   const LIMIT = 4;
 
   useEffect(() => {
-    const storedUserId = localStorage.getItem('userId');
-    const storedIsAdmin = localStorage.getItem('isAdmin');
-    const storedUserName = localStorage.getItem('userFullName');
-    
-    setUserId(storedUserId);
-    setIsAdmin(storedIsAdmin === 'true');
-    setUserName(storedUserName || "");
 
     // Fetch all training logs, animals, and users
     const fetchData = async () => {
@@ -159,7 +151,7 @@ export default function AllTrainingPage() {
     <div className="h-screen flex flex-col overflow-hidden">
       <TopBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
       <div className="flex flex-1 overflow-hidden">
-        <SideBar userName={userName} isAdmin={isAdmin} />
+        <SideBar userName={user?.fullName || ""} isAdmin={user?.admin || false} />
         
         <main className="flex-1 p-10 bg-gray-50 overflow-y-auto">
           

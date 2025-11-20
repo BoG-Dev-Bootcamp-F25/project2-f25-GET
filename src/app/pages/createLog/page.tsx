@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import TopBar from "../../components/TopBar";
 import SideBar from "../../components/SideBar";
+import { useAuth } from "../../hooks/useAuth";
 
 // FAKE
 const dummyAnimals = [
@@ -37,6 +38,7 @@ const FormInput = ({ id, value, onChange, ...props }: any) => (
 
 export default function CreateLogPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [title, setTitle] = useState('');
   const [animalId, setAnimalId] = useState('');
   const [hours, setHours] = useState('');
@@ -45,22 +47,11 @@ export default function CreateLogPage() {
   const [day, setDay] = useState(new Date().getDate().toString());
   const [year, setYear] = useState(currentYear.toString());
   const [animals, setAnimals] = useState<AnimalOption[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [userName, setUserName] = useState('');
-  const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const storedUserId = localStorage.getItem('userId');
-    const storedUserName = localStorage.getItem('userFullName');
-    const storedIsAdmin = localStorage.getItem('isAdmin');
-
-    setUserId(storedUserId);
-    setUserName(storedUserName || '');
-    setIsAdmin(storedIsAdmin === 'true');
-
     // API CALL
     setAnimals(dummyAnimals);
     // ---
@@ -75,7 +66,7 @@ export default function CreateLogPage() {
       setError('All fields except Note are required.');
       return;
     }
-    if (!userId) {
+    if (!user) {
       setError('Could not find user. Please log in again.');
       return;
     }
@@ -93,7 +84,7 @@ export default function CreateLogPage() {
 
     // euan hook up
     const logData = {
-      user: userId,
+      user: user.id,
       animal: animalId,
       title,
       description,
@@ -125,7 +116,7 @@ export default function CreateLogPage() {
     <div className="h-screen flex flex-col overflow-hidden">
       <TopBar />
       <div className="flex flex-1 overflow-hidden">
-        <SideBar userName={userName} isAdmin={isAdmin} />
+        <SideBar userName={user?.fullName || ""} isAdmin={user?.admin || false} />
         
         <main className="flex-1 overflow-y-auto p-4 md:p-10 bg-gray-50">
           <h1 className="text-2xl font-normal text-gray-700">Training logs</h1>
