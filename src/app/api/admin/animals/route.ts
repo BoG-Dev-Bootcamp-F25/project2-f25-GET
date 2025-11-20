@@ -4,7 +4,12 @@ export const GET = async (
     req: Request
 ): Promise<Response> => {
     try {
-        const animals = await readAnimals();
+        const { searchParams } = new URL(req.url);
+        const lastId = searchParams.get('lastId') ?? undefined;
+        const limit = parseInt(searchParams.get('limit') ?? '4');
+        const ownerId = searchParams.get('ownerId') ?? undefined;
+
+        const animals = await readAnimals(lastId, limit, ownerId);
 
         return Response.json(
             animals,
@@ -13,7 +18,7 @@ export const GET = async (
     } catch (error) {
         console.error("get animal error:", error);
         return new Response(
-            "Failed to get users",
+            "Failed to get animals",
             { status: 500 }
         );
     }
