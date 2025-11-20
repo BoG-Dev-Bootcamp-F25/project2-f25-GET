@@ -28,7 +28,7 @@ export default function CreateAnimalPage() {
   const [name, setName] = useState('');
   const [breed, setBreed] = useState('');
   const [hours, setHours] = useState('');
-  const [note, setNote] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [month, setMonth] = useState(months[new Date().getMonth()]);
   const [day, setDay] = useState(new Date().getDate().toString());
   const [year, setYear] = useState(currentYear.toString());
@@ -60,32 +60,40 @@ export default function CreateAnimalPage() {
       return;
     }
 
-    // weee backend
     const animalData = {
       owner: user.id,
       name,
       breed,
       hoursTrained: Number(hours),
       birthDate: birthDate,
-      note, // maybe the model doesn't have this? ion, just a placeholder
-      profilePicture: '/images/default-animal-avatar.png',
+      note: '',
+      profilePicture: imageUrl || '/images/dog2.png',
     };
 
-    console.log('FAKE SUBMIT');
-    console.log('Submitting this data to /api/animal:', animalData);
-    
-    // fake API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    console.log('FAKE SUCCESS');
-    setSuccess('Animal created successfully! Redirecting...');
-    setIsSubmitting(false);
+    try {
+      const response = await fetch('/api/animal', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(animalData),
+        credentials: 'include',
+      });
 
-    setTimeout(() => {
-      router.push('/pages/animals');
-    }, 2000);
-
-    // real code later
+      if (response.ok) {
+        setSuccess('Animal created successfully! Redirecting...');
+        setTimeout(() => {
+          router.push('/pages/animals');
+        }, 1500);
+      } else {
+        setError('Failed to create animal.');
+      }
+    } catch (error) {
+      console.error('Error creating animal:', error);
+      setError('Something went wrong.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
@@ -187,19 +195,16 @@ export default function CreateAnimalPage() {
             </div>
 
             <div>
-              <label htmlFor="note" className="block text-sm font-bold text-gray-700">
-                Note
+              <label htmlFor="imageUrl" className="block text-sm font-bold text-gray-700">
+                Image URL (optional)
               </label>
-              <textarea
-                id="note"
-                rows={4}
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                className="mt-1 block w-full p-2.5 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              <FormInput
+                type="text"
+                id="imageUrl"
+                value={imageUrl}
+                onChange={(e: any) => setImageUrl(e.target.value)}
               />
             </div>
-            
-            {/* image upload? */}
 
             {error && (
               <div className="p-3 text-red-800 bg-red-100 border border-red-300 rounded-md">
