@@ -16,6 +16,10 @@ const userSchema = new Schema ({
     admin: {
         type: Boolean,
         required: true,
+    },
+    location: {
+        type: String,
+        default: "Atlanta, Georgia"
     }
 });
 
