@@ -18,6 +18,7 @@ export default function AllUsersPage() {
 
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const storedIsAdmin = localStorage.getItem('isAdmin');
@@ -44,14 +45,18 @@ export default function AllUsersPage() {
     fetchUsers();
   }, []);
 
+  const filteredUsers = users.filter(user =>
+    user.fullName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="h-screen flex flex-col">
-      <TopBar />
-      <div className="flex flex-1">
+    <div className="h-screen flex flex-col overflow-hidden">
+      <TopBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+      <div className="flex flex-1 overflow-hidden">
         
         <SideBar userName={userName} isAdmin={isAdmin} />
         
-        <main className="flex-1 p-10 w-full bg-gray-50">
+        <main className="flex-1 overflow-y-auto p-10 w-full bg-gray-50">
           
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-normal text-gray-700">All users</h1>
@@ -63,7 +68,7 @@ export default function AllUsersPage() {
             <p className="text-gray-500">Loading users...</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <UserCard key={user._id} user={user} />
               ))}
             </div>

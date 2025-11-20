@@ -29,6 +29,7 @@ export default function AllAnimalsPage() {
   const [hasMore, setHasMore] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCursors, setPageCursors] = useState<(string | undefined)[]>([undefined]);
+  const [searchQuery, setSearchQuery] = useState('');
   const LIMIT = 6;
 
   useEffect(() => {
@@ -118,13 +119,24 @@ export default function AllAnimalsPage() {
     }
   };
 
+  const filteredAnimals = animals.filter(animal => {
+    const ownerName = users[animal.owner]?.fullName || '';
+    const query = searchQuery.toLowerCase();
+
+    const nameMatch = animal.name.toLowerCase().includes(query);
+    const breedMatch = animal.breed.toLowerCase().includes(query);
+    const ownerMatch = ownerName.toLowerCase().includes(query);
+
+    return nameMatch || breedMatch || ownerMatch;
+  });
+
   return (
-    <div className="h-screen flex flex-col">
-      <TopBar />
-      <div className="flex flex-1">
+    <div className="h-screen flex flex-col overflow-hidden">
+      <TopBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+      <div className="flex flex-1 overflow-hidden">
         <SideBar userName={userName} isAdmin={isAdmin} />
         
-        <main className="flex-1 p-10 w-full bg-gray-50">
+        <main className="flex-1 p-10 bg-gray-50 overflow-y-auto">
           
           {/* header */}
           <div className="mb-6">
@@ -136,12 +148,12 @@ export default function AllAnimalsPage() {
           {/* animals grid */}
           {loading ? (
             <p>Loading animals</p>
-          ) : animals.length === 0 ? (
+          ) : filteredAnimals.length === 0 ? (
             <p>No animals found!</p>
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {animals.map((animal) => {
+                {filteredAnimals.map((animal) => {
                   const ownerName = users[animal.owner]?.fullName || 'Unknown Owner';
                   return (
                     <AnimalCard 

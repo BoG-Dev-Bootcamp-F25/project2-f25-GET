@@ -37,6 +37,7 @@ export default function AllTrainingPage() {
   const [hasMore, setHasMore] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCursors, setPageCursors] = useState<(string | undefined)[]>([undefined]);
+  const [searchQuery, setSearchQuery] = useState('');
   const LIMIT = 4;
 
   useEffect(() => {
@@ -142,13 +143,25 @@ export default function AllTrainingPage() {
     }
   };
 
+  const filteredLogs = trainingLogs.filter(log => {
+    const animal = animals[log.animal];
+    const user = users[log.user];
+    const query = searchQuery.toLowerCase();
+
+    const titleMatch = log.title.toLowerCase().includes(query);
+    const animalMatch = animal && animal.name.toLowerCase().includes(query);
+    const userMatch = user && user.fullName.toLowerCase().includes(query);
+    
+    return titleMatch || animalMatch || userMatch;
+  });
+
   return (
-    <div className="h-screen flex flex-col">
-      <TopBar />
-      <div className="flex flex-1">
+    <div className="h-screen flex flex-col overflow-hidden">
+      <TopBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+      <div className="flex flex-1 overflow-hidden">
         <SideBar userName={userName} isAdmin={isAdmin} />
         
-        <main className="flex-1 p-10 w-full bg-gray-50 overflow-y-auto">
+        <main className="flex-1 p-10 bg-gray-50 overflow-y-auto">
           
           {/* header */}
           <div className="mb-6">
@@ -160,11 +173,11 @@ export default function AllTrainingPage() {
           {/* log list */}
           {loading ? (
             <p>Loading training logs</p>
-          ) : trainingLogs.length === 0 ? (
+          ) : filteredLogs.length === 0 ? (
             <p>No training logs found!</p>
           ) : (
             <div className="flex flex-col space-y-5">
-              {trainingLogs.map((log) => {
+              {filteredLogs.map((log) => {
                 const animal = animals[log.animal];
                 const ownerName = users[log.user]?.fullName || 'Unknown User';
                 

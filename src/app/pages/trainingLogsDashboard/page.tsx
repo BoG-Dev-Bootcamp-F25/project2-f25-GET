@@ -33,6 +33,7 @@ export default function TrainingLogsDashboard() {
   const [hasMore, setHasMore] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCursors, setPageCursors] = useState<(string | undefined)[]>([undefined]);
+  const [searchQuery, setSearchQuery] = useState('');
   const LIMIT = 4;
 
   useEffect(() => {
@@ -126,20 +127,24 @@ export default function TrainingLogsDashboard() {
     }
   }
 
+  const filteredLogs = trainingLogs.filter(log =>
+    log.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="h-screen flex flex-col">
-      <TopBar />
-      <div className="flex flex-1">
+    <div className="h-screen flex flex-col overflow-hidden">
+      <TopBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+      <div className="flex flex-1 overflow-hidden">
         <SideBar userName={userName} isAdmin={isAdmin}/>
         
-        <main className="flex-1 p-10 w-full bg-gray-50">
+        <main className="flex-1 p-10 bg-gray-50 overflow-y-auto">
           
           {/* title + create new button */}
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-normal text-gray-700">Training logs</h1>
             
             {/* create new */}
-            <Link href="/pages/create-log">
+            <Link href="/pages/createLog">
               <button className="flex items-center text-gray-700 font-medium hover:text-indigo-600 transition">
                 <Image
                   src="/images/createNewLogo.png"
@@ -157,11 +162,11 @@ export default function TrainingLogsDashboard() {
           {/* log list */}
           {loading ? (
             <p>Loading training logs</p>
-          ) : trainingLogs.length === 0 ? (
+          ) : filteredLogs.length === 0 ? (
             <p>No training logs found!</p>
           ) : (
             <div className="flex flex-col space-y-5">
-              {trainingLogs.map((log) => {
+              {filteredLogs.map((log) => {
                 const animal = animals[log.animal];
                 
                 return (

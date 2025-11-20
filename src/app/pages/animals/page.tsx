@@ -25,6 +25,7 @@ export default function AnimalsPage() {
   const [hasMore, setHasMore] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCursors, setPageCursors] = useState<(string | undefined)[]>([undefined]);
+  const [searchQuery, setSearchQuery] = useState('');
   const LIMIT = 6;
 
   useEffect(() => {
@@ -91,20 +92,25 @@ export default function AnimalsPage() {
     }
   }
 
+  const filteredAnimals = animals.filter(animal =>
+    animal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    animal.breed.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="h-screen flex flex-col">
-      <TopBar />
-      <div className="flex flex-1">
+    <div className="h-screen flex flex-col overflow-hidden">
+      <TopBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+      <div className="flex flex-1 overflow-hidden">
         <SideBar userName={userName} isAdmin={isAdmin} />
         
-        <main className="flex-1 p-10 w-full bg-gray-50">
+        <main className="flex-1 p-10 bg-gray-50 overflow-y-auto">
           
           {/* header */}
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-normal text-gray-700">Animals</h1>
             
             {/* create new */}
-            <Link href="/pages/create-animal">
+            <Link href="/pages/createAnimal">
               <button className="flex items-center text-gray-700 font-medium hover:text-indigo-600 transition">
                 <Image
                   src="/images/createNewLogo.png"
@@ -122,12 +128,12 @@ export default function AnimalsPage() {
           {/* animals grid */}
           {loading ? (
             <p>Loading animals</p>
-          ) : animals.length === 0 ? (
+          ) : filteredAnimals.length === 0 ? (
             <p>No animals found!</p>
           ) : (
             <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {animals.map((animal) => (
+              {filteredAnimals.map((animal) => (
                 <AnimalCard 
                   key={animal._id} 
                   animal={{
