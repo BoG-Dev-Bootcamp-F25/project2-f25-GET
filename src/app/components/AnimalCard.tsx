@@ -14,15 +14,27 @@ const getInitial = (name: string) => {
   return name ? name[0].toUpperCase() : '?';
 };
 
+const isValidUrl = (url: string): boolean => {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export default function AnimalCard({ animal }: AnimalCardProps) {
   const ownerInitial = getInitial(animal.ownerName);
+  const imageUrl = animal.imageUrl && isValidUrl(animal.imageUrl)
+    ? animal.imageUrl
+    : '/images/dog2.png';
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       
       <div className="relative w-full h-48">
         <Image
-          src={animal.imageUrl}
+          src={imageUrl}
           alt={animal.name}
           layout="fill"
           objectFit="cover"
