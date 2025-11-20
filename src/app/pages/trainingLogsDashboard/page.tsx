@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import SideBar from '../../components/SideBar';
 import TrainingLogCard from '../../components/TrainingLogCard';
+import { useAuth } from '../../hooks/useAuth';
 
 interface TrainingLog {
   _id: string;
@@ -24,9 +25,7 @@ interface Animal {
 }
 
 export default function TrainingLogsDashboard() {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const [userName, setUserName] = useState<string>("");
+  const { user, loading: authLoading } = useAuth();
   const [trainingLogs, setTrainingLogs] = useState<TrainingLog[]>([]);
   const [animals, setAnimals] = useState<Record<string, Animal>>({});
   const [loading, setLoading] = useState(true);
@@ -37,19 +36,14 @@ export default function TrainingLogsDashboard() {
   const LIMIT = 4;
 
   useEffect(() => {
-    // Get user info from localStorage
-    const storedUserId = localStorage.getItem('userId');
-    const storedIsAdmin = localStorage.getItem('isAdmin');
-    const storedUserName = localStorage.getItem('userFullName');
-    
-    setUserId(storedUserId);
-    setIsAdmin(storedIsAdmin === 'true');
-    setUserName(storedUserName || "");
+    if (authLoading) return;
+
+    if (!user) return;
 
     // both logs and animals
     const fetchData = async () => {
       const [logs] = await Promise.all([
-        fetchTrainingLogs(undefined, storedUserId),
+        fetchTrainingLogs(undefined, user.id),
         fetchAnimals()
       ]);
 
@@ -66,7 +60,7 @@ export default function TrainingLogsDashboard() {
     };
 
     fetchData();
-  }, []);
+  }, [authLoading, user]);
 
   const fetchTrainingLogs = async (lastId?: string, currentUserId: string | null = null) => {
     try {
@@ -96,7 +90,7 @@ export default function TrainingLogsDashboard() {
 
   const handlePageChange = async (page: number) => {
     const cursor = pageCursors[page - 1];
-    const data = await fetchTrainingLogs(cursor, userId);
+    const data = await fetchTrainingLogs(cursor, user?.id);
     setCurrentPage(page);
 
     if (data && data.length === LIMIT) {
@@ -135,7 +129,7 @@ export default function TrainingLogsDashboard() {
     <div className="h-screen flex flex-col overflow-hidden">
       <TopBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
       <div className="flex flex-1 overflow-hidden">
-        <SideBar userName={userName} isAdmin={isAdmin}/>
+        <SideBar userName={user?.fullName || ""} isAdmin={user?.admin || false}/>
         
         <main className="flex-1 p-10 bg-gray-50 overflow-y-auto">
           
@@ -176,7 +170,7 @@ export default function TrainingLogsDashboard() {
                       title: log.title,
                       date: new Date(log.date),
                       hours: log.hours,
-                      ownerName: userName,
+                      ownerName: user?.fullName || "",
                       animalName: animal ? animal.name : 'Animal',
                       animalBreed: animal ? animal.breed : 'Breed',
                       description: log.description,

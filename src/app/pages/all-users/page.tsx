@@ -4,6 +4,7 @@ import TopBar from "../../components/TopBar";
 import SideBar from "../../components/SideBar";
 import UserCard from "../../components/UserCard";
 import { useState, useEffect } from "react";
+import { useAuth } from "../../hooks/useAuth";
 
 type User = {
   _id: string;
@@ -13,19 +14,12 @@ type User = {
 };
 
 export default function AllUsersPage() {
+  const { user } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const [userName, setUserName] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    const storedIsAdmin = localStorage.getItem('isAdmin');
-    const storedUserName = localStorage.getItem('userFullName');
-    
-    setIsAdmin(storedIsAdmin === 'true');
-    setUserName(storedUserName || "");
 
     const fetchUsers = async () => {
       try {
@@ -54,7 +48,7 @@ export default function AllUsersPage() {
       <TopBar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
       <div className="flex flex-1 overflow-hidden">
         
-        <SideBar userName={userName} isAdmin={isAdmin} />
+        <SideBar userName={user?.fullName || ""} isAdmin={user?.admin || false} />
         
         <main className="flex-1 overflow-y-auto p-10 w-full bg-gray-50">
           

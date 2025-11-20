@@ -1,7 +1,11 @@
+'use client';
+
 import { useEffect, useState } from "react";
 import SideRoute from "../components/SideRoute";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../hooks/useAuth";
 
 type Props = {
   userName?: string;
@@ -9,6 +13,13 @@ type Props = {
 };
 
 export default function SideBar({ userName, isAdmin }: Props) {
+  const router = useRouter();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/');
+  };
   return (
     <div
       className="h-full flex flex-col items-center border-r-3 border-gray-100
@@ -76,14 +87,18 @@ export default function SideBar({ userName, isAdmin }: Props) {
             </div>
           </div>
 
-          <Link href="/">
+          <button
+            onClick={handleLogout}
+            className="bg-transparent border-none cursor-pointer"
+            aria-label="logout"
+          >
             <Image
               src={"/images/logoutLogo.png"}
               alt={"logout"}
               width={22}
               height={22}
             />
-          </Link>
+          </button>
         </div>
       </div>
     </div>
