@@ -34,6 +34,10 @@ export default function AllTrainingPage() {
   const [animals, setAnimals] = useState<Record<string, Animal>>({});
   const [users, setUsers] = useState<Record<string, User>>({});
   const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageCursors, setPageCursors] = useState<(string | undefined)[]>([undefined]);
+  const LIMIT = 4;
 
   useEffect(() => {
     const storedUserId = localStorage.getItem('userId');
@@ -46,34 +50,61 @@ export default function AllTrainingPage() {
 
     // Fetch all training logs, animals, and users
     const fetchData = async () => {
-      await Promise.all([
+      const [logs] = await Promise.all([
         fetchTrainingLogs(),
         fetchAnimals(),
         fetchUsers()
       ]);
+      
+      if (logs && logs.length === LIMIT) {
+        const lastId = logs[logs.length - 1]._id;
+        setPageCursors(prev => {
+            const newCursors = [...prev];
+            newCursors[1] = lastId;
+            return newCursors;
+        });
+      }
       setLoading(false);
     };
 
     fetchData();
   }, []);
 
-  const fetchTrainingLogs = async () => {
+  const fetchTrainingLogs = async (lastId?: string) => {
     try {
-      const response = await fetch('/api/admin/training');
+      const params = new URLSearchParams();
+      params.set('limit', LIMIT.toString());
+      if (lastId) params.set('lastId', lastId);
+
+      const response = await fetch(`/api/admin/training?${params.toString()}`);
       if (response.ok) {
         const data = await response.json();
-        // Sort by date in descending order (newest first)
-        const sortedLogs = data.sort((a: TrainingLog, b: TrainingLog) => 
-          new Date(b.date).getTime() - new Date(a.date).getTime()
-        );
-        setTrainingLogs(sortedLogs);
+        setTrainingLogs(data);
+        setHasMore(data.length === LIMIT);
+        return data;
       } else {
         console.error("Failed to get logs");
       }
     } catch (error) {
       console.error("Error getting training logs:", error);
     }
+    return [];
   };
+
+  const handlePageChange = async (page: number) => {
+    const cursor = pageCursors[page - 1];
+    const data = await fetchTrainingLogs(cursor);
+    setCurrentPage(page);
+    
+    if (data && data.length === LIMIT) {
+        const lastId = data[data.length - 1]._id;
+        setPageCursors(prev => {
+            const newCursors = [...prev];
+            newCursors[page] = lastId;
+            return newCursors;
+        });
+    }
+  }
 
   const fetchAnimals = async () => {
     try {
@@ -117,7 +148,7 @@ export default function AllTrainingPage() {
       <div className="flex flex-1">
         <SideBar userName={userName} isAdmin={isAdmin} />
         
-        <main className="flex-1 p-10 w-full bg-gray-50">
+        <main className="flex-1 p-10 w-full bg-gray-50 overflow-y-auto">
           
           {/* header */}
           <div className="mb-6">
@@ -152,6 +183,34 @@ export default function AllTrainingPage() {
                   />
                 );
               })}
+
+              <div className="flex justify-start space-x-4 mt-4">
+                <button 
+                    disabled={currentPage === 1} 
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    className="text-blue-600 hover:underline disabled:text-gray-400"
+                >
+                    Previous
+                </button>
+                
+                {pageCursors.map((_, index) => (
+                    <button
+                        key={index}
+                        onClick={() => handlePageChange(index + 1)}
+                        className={`hover:underline ${currentPage === index + 1 ? 'font-bold text-black' : 'text-blue-600'}`}
+                    >
+                        {index + 1}
+                    </button>
+                ))}
+                
+                <button 
+                    disabled={!hasMore} 
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    className="text-blue-600 hover:underline disabled:text-gray-400"
+                >
+                    Next
+                </button>
+              </div>
             </div>
           )}
           
