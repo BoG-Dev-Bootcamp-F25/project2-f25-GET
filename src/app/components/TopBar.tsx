@@ -46,7 +46,7 @@ export default function TopBar({ searchQuery, onSearchChange }: Props) {
         </div>
         <div className="w-1/3"></div>
       </div>
-      <hr></hr>
+      <hr className="border-t-2 border-gray-300"></hr>
     </div>
   );
 }
